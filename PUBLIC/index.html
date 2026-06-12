@@ -1,1 +1,325 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-green: #115e59;
+            --light-green: #14b8a6;
+            --glass-bg: rgba(255, 255, 255, 0.82);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --text-dark: #0f172a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, #042f2e 0%, #115e59 50%, #134e4a 100%);
+            height: 100vh;
+            display: flex;
+            color: var(--text-dark);
+            overflow: hidden;
+            font-size: 13px;
+        }
+
+        /* --- AUTH LAYER --- */
+        #authContainer {
+            position: fixed; inset: 0; z-index: 9999;
+            background: linear-gradient(45deg, #042f2e, #115e59);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .auth-card {
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2); padding: 30px; border-radius: 16px;
+            width: 100%; max-width: 340px; text-align: center; color: white;
+        }
+        .auth-card input {
+            width: 100%; padding: 10px; margin: 8px 0; border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; font-size: 13px;
+        }
+        .auth-btn {
+            width: 100%; padding: 10px; border: none; border-radius: 6px;
+            background: #14b8a6; color: white; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 13px;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 220px; padding: 20px 12px; display: flex; flex-direction: column; gap: 20px;
+            background: rgba(4, 47, 46, 0.6); backdrop-filter: blur(10px); border-right: 1px solid var(--glass-border);
+        }
+        .brand { color: white; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .brand i { color: var(--light-green); font-size: 18px; }
+        .nav-tabs { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+        .tab-btn {
+            display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: none;
+            background: transparent; color: #ccfbf1; font-size: 13px; font-weight: 500; border-radius: 8px; cursor: pointer; text-align: left;
+        }
+        .tab-btn:hover, .tab-btn.active { background: rgba(255, 255, 255, 0.15); color: white; }
+
+        /* --- FRAMEWORK CANVAS --- */
+        .main-content { flex: 1; display: flex; flex-direction: column; padding: 16px; overflow: hidden; gap: 16px; }
+        
+        .hero-section {
+            background: var(--glass-bg); backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 14px; padding: 14px 24px;
+            display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        }
+        .hero-title h1 { font-size: 18px; font-weight: 700; color: #0f172a; }
+        .hero-title p { color: #475569; font-size: 12px; margin-top: 1px; }
+        .logout-btn { background: #ef4444; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; }
+
+        .dashboard-grid { display: flex; gap: 16px; flex: 1; overflow: hidden; }
+        .card {
+            background: var(--glass-bg); backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 14px; padding: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.05); display: flex; flex-direction: column;
+        }
+        .card-form { width: 300px; shrink: 0; align-self: flex-start; }
+        .card-table { flex: 1; overflow: hidden; }
+        .table-scroll-wrapper { flex: 1; overflow-y: auto; margin-top: 10px; border-radius: 6px; border: 1px solid #e2e8f0; }
+
+        h2 { font-size: 14px; font-weight: 600; margin-bottom: 12px; text-transform: capitalize; color: #0f172a; }
+        
+        form { display: flex; flex-direction: column; gap: 10px; }
+        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        label { font-size: 11px; font-weight: 600; color: #475569; }
+        input { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; }
+        input:focus { border-color: var(--primary-green); box-shadow: 0 0 0 2px rgba(17,94,89,0.1); }
+        .submit-btn { background: var(--primary-green); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; margin-top: 4px; }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; background: white; }
+        th { padding: 10px 12px; font-size: 11px; text-transform: uppercase; color: #475569; border-bottom: 2px solid #e2e8f0; background: #f8fafc; font-weight: 700; position: sticky; top: 0; }
+        td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-size: 13px; color: #334155; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #f8fafc; }
+        
+        .actions-cell { display: flex; gap: 4px; }
+        .action-btn { border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; }
+        .btn-edit { background: #f59e0b; color: white; }
+        .btn-delete { background: #ef4444; color: white; }
+    </style>
+</head>
+<body>
+
+    <div id="authContainer">
+        <div class="auth-card">
+            <i class="fa-solid fa-building-columns" style="font-size: 32px; color: #14b8a6; margin-bottom: 10px;"></i>
+            <h2 style="color: white; margin-bottom: 12px;">College Management System</h2>
+            <input type="text" id="username" placeholder="Username (admin)">
+            <input type="password" id="password" placeholder="Password (admin)">
+            <button class="auth-btn" onclick="handleLogin()">Authenticate</button>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="brand"><i class="fa-solid fa-graduation-cap"></i> <span>EduManager Pro</span></div>
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTable('student', this)"><i class="fa-solid fa-user-graduate"></i> Students</button>
+            <button class="tab-btn" onclick="switchTable('department', this)"><i class="fa-solid fa-building-columns"></i> Departments</button>
+            <button class="tab-btn" onclick="switchTable('faculty', this)"><i class="fa-solid fa-chalkboard-user"></i> Faculty</button>
+            <button class="tab-btn" onclick="switchTable('course', this)"><i class="fa-solid fa-book"></i> Courses</button>
+            <button class="tab-btn" onclick="switchTable('class', this)"><i class="fa-solid fa-calendar"></i> Classes</button>
+            <button class="tab-btn" onclick="switchTable('exam', this)"><i class="fa-solid fa-file-signature"></i> Exams</button>
+            <button class="tab-btn" onclick="switchTable('attendance', this)"><i class="fa-solid fa-clipboard-user"></i> Attendance</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="hero-section">
+            <div>
+                <h1>College Management System</h1>
+                <p>System Overview / Control Dashboard</p>
+            </div>
+            <button class="logout-btn" onclick="handleLogout()"><i class="fa-solid fa-power-off"></i> Disconnect</button>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card card-form">
+                <h2 id="formTitle">Manage Entity</h2>
+                <form id="universalForm">
+                    <input type="hidden" id="isEditMode" value="false">
+                    <div id="dynamicInputsContainer"></div>
+                    <button type="submit" class="submit-btn" id="submitBtn">Save Record</button>
+                </form>
+            </div>
+
+            <div class="card card-table">
+                <h2 id="tableTitle">Live Matrix Data</h2>
+                <div class="table-scroll-wrapper">
+                    <div id="tableContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTargetTable = 'student';
+
+        const tableSchemas = {
+            student: [
+                { id: 'student_id', label: 'Student ID Key', type: 'text', placeholder: 'e.g., S101' },
+                { id: 'first_name', label: 'First Name', type: 'text', placeholder: 'First Name' },
+                { id: 'last_name', label: 'Last Name', type: 'text', placeholder: 'Last Name' },
+                { id: 'department_id', label: 'Department ID Link (FK)', type: 'text', placeholder: 'e.g., D1' }
+            ],
+            department: [
+                { id: 'department_id', label: 'Department ID Key', type: 'text', placeholder: 'e.g., D1' },
+                { id: 'department_name', label: 'Department Name', type: 'text', placeholder: 'e.g., Computer Science' }
+            ],
+            faculty: [
+                { id: 'faculty_id', label: 'Faculty ID Key', type: 'text', placeholder: 'e.g., F501' },
+                { id: 'designation', label: 'Designation', type: 'text', placeholder: 'e.g., Professor' },
+                { id: 'department_id', label: 'Department ID Link (FK)', type: 'text', placeholder: 'e.g., D1' }
+            ],
+            course: [
+                { id: 'course_id', label: 'Course ID Key', type: 'text', placeholder: 'e.g., C301' },
+                { id: 'course_name', label: 'Course Name', type: 'text', placeholder: 'e.g., Web Development' },
+                { id: 'department_id', label: 'Department ID Link (FK)', type: 'text', placeholder: 'e.g., D1' }
+            ],
+            class: [
+                { id: 'class_id', label: 'Class Instance ID', type: 'text', placeholder: 'e.g., CL801' },
+                { id: 'course_id', label: 'Course ID Link (FK)', type: 'text', placeholder: 'e.g., C301' },
+                { id: 'faculty_id', label: 'Faculty ID Link (FK)', type: 'text', placeholder: 'e.g., F501' }
+            ],
+            exam: [
+                { id: 'exam_id', label: 'Exam Operation ID', type: 'text', placeholder: 'e.g., EX901' },
+                { id: 'course_id', label: 'Course ID Link (FK)', type: 'text', placeholder: 'e.g., C301' }
+            ],
+            attendance: [
+                { id: 'attendance_id', label: 'Attendance Log ID', type: 'text', placeholder: 'e.g., A003' },
+                { id: 'student_id', label: 'Student ID Reference (FK)', type: 'text', placeholder: 'e.g., S101' },
+                { id: 'class_id', label: 'Class ID Reference (FK)', type: 'text', placeholder: 'e.g., CL801' }
+            ]
+        };
+
+        function handleLogin() {
+            if(document.getElementById('username').value === 'admin' && document.getElementById('password').value === 'admin') {
+                document.getElementById('authContainer').style.display = 'none';
+                switchTable('student');
+            } else alert('Access Denied.');
+        }
+        function handleLogout() { document.getElementById('authContainer').style.display = 'flex'; }
+
+        function switchTable(tableName, element) {
+            currentTargetTable = tableName;
+            if (element) {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                element.classList.add('active');
+            }
+            buildDynamicInputs();
+            fetchAndRenderContent();
+        }
+
+        function buildDynamicInputs() {
+            const container = document.getElementById('dynamicInputsContainer');
+            const fields = tableSchemas[currentTargetTable];
+            
+            document.getElementById('formTitle').innerText = `Add New ${currentTargetTable}`;
+            document.getElementById('tableTitle').innerText = `Live Registered ${currentTargetTable} records`;
+            document.getElementById('isEditMode').value = 'false';
+            document.getElementById('submitBtn').innerText = 'Save Record';
+
+            let html = '';
+            fields.forEach(f => {
+                html += `
+                    <div class="form-group">
+                        <label for="${f.id}">${f.label}</label>
+                        <input type="${f.type}" id="${f.id}" placeholder="${f.placeholder}" required>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        document.getElementById('universalForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fields = tableSchemas[currentTargetTable];
+            const isEdit = document.getElementById('isEditMode').value === 'true';
+
+            let payload = { isEdit: isEdit };
+            fields.forEach(f => {
+                payload[f.id] = document.getElementById(f.id).value;
+            });
+
+            const response = await fetch(`/api/${currentTargetTable}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if(response.ok) {
+                buildDynamicInputs();
+                fetchAndRenderContent();
+            } else {
+                const errData = await response.json();
+                alert("Database Error: " + errData.error);
+            }
+        });
+
+        async function fetchAndRenderContent() {
+            const res = await fetch(`/api/${currentTargetTable}`);
+            const data = await res.json();
+            const container = document.getElementById('tableContainer');
+
+            if(!data || data.length === 0) {
+                container.innerHTML = `<p style="padding:12px; color:#64748b;">No records inside the ${currentTargetTable.toUpperCase()} entity.</p>`;
+                return;
+            }
+
+            const keys = Object.keys(data[0]);
+            let html = `<table><thead><tr>`;
+            keys.forEach(k => html += `<th>${k.replace('_',' ')}</th>`);
+            html += `<th>Actions</th></tr></thead><tbody>`;
+
+            data.forEach(row => {
+                html += `<tr>`;
+                keys.forEach(k => html += `<td>${row[k]}</td>`);
+                
+                const primaryKeyName = keys[0];
+                const pKeyValue = row[primaryKeyName];
+                const rowStringified = btoa(unescape(encodeURIComponent(JSON.stringify(row))));
+
+                // 🛠️ FIXED: Removed table filters so edit button renders universally across ALL sub-tables
+                html += `
+                    <td class="actions-cell">
+                        <button class="action-btn btn-edit" onclick="triggerUniversalEdit('${rowStringified}')"><i class="fa-solid fa-pen"></i></button>
+                        <button class="action-btn btn-delete" onclick="triggerDelete('${primaryKeyName}','varValue')"><i class="fa-solid fa-trash"></i></button>
+                    </td></tr>`;
+                html = html.replace('varValue', pKeyValue);
+            });
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        function triggerUniversalEdit(encodedData) {
+            const rowData = JSON.parse(decodeURIComponent(escape(atob(encodedData))));
+            const keys = Object.keys(rowData);
+            
+            document.getElementById('isEditMode').value = 'true';
+            document.getElementById('formTitle').innerText = `Edit ${currentTargetTable}`;
+            document.getElementById('submitBtn').innerText = 'Update';
+
+            keys.forEach((key, index) => {
+                const inputElement = document.getElementById(key);
+                if(inputElement) {
+                    inputElement.value = rowData[key];
+                    if(index === 0) inputElement.disabled = true; // Protect primary index key
+                }
+            });
+        }
+
+        async function triggerDelete(keyName, keyValue) {
+            if(confirm(`Delete this record from ${currentTargetTable}?`)) {
+                await fetch(`/api/${currentTargetTable}/${keyName}/${keyValue}`, { method: 'DELETE' });
+                fetchAndRenderContent();
+            }
+        }
+    </script>
+</body>
+</html>
